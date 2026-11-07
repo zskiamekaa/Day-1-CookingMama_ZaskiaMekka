@@ -1,0 +1,505 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Study Planner</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f3ff;
+            color: #292442;
+        }
+
+        header {
+            background: #6c55c9;
+            color: white;
+            padding: 28px 7%;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 28px;
+        }
+
+        header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        main {
+            width: min(1050px, 92%);
+            margin: 28px auto;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .card, .panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 18px rgba(45, 32, 90, 0.07);
+        }
+
+        .summary h2 {
+            margin: 0;
+            color: #6c55c9;
+            font-size: 27px;
+        }
+
+        .summary p {
+            margin: 7px 0 0;
+            color: #77718d;
+        }
+
+        .panel h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 2fr 1.3fr 1.2fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        input, select, button {
+            padding: 12px;
+            border: 1px solid #ddd8ef;
+            border-radius: 9px;
+            font: inherit;
+            min-width: 0;
+        }
+
+        input:focus, select:focus {
+            outline: 2px solid #b9aaf5;
+        }
+
+        button {
+            border: 0;
+            background: #6c55c9;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #5741ad;
+        }
+
+        .task {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid #eeeaf7;
+        }
+
+        .task:last-child {
+            border-bottom: 0;
+        }
+
+        .task input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .task-info {
+            flex: 1;
+        }
+
+        .task-info strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .task-info small {
+            color: #77718d;
+        }
+
+        .priority {
+            font-size: 12px;
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #eeeaff;
+            color: #6049bd;
+        }
+
+        .high {
+            background: #ffe5e5;
+            color: #b33c3c;
+        }
+
+        .medium {
+            background: #fff1d6;
+            color: #986500;
+        }
+
+        .low {
+            background: #e3f7e9;
+            color: #267744;
+        }
+
+        .done strong {
+            text-decoration: line-through;
+            color: #999;
+        }
+
+        .delete {
+            background: #fce9ed;
+            color: #b43e55;
+            padding: 8px 10px;
+        }
+
+        .delete:hover {
+            background: #f8d6df;
+        }
+
+        .empty {
+            color: #888;
+            text-align: center;
+            padding: 25px 0;
+        }
+
+        .progress-bg {
+            height: 10px;
+            background: #eeeaf7;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0;
+            background: #6c55c9;
+            transition: width 0.2s;
+        }
+
+        footer {
+            text-align: center;
+            color: #89839d;
+            padding: 25px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 750px) {
+            .summary {
+                grid-template-columns: 1fr;
+            }
+
+            form {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            form input:first-child {
+                grid-column: 1 / -1;
+            }
+
+            form button {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 460px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+
+            form input:first-child,
+            form button {
+                grid-column: auto;
+            }
+
+            .task {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>My Study Planner 📚</h1>
+        <p>Rencanakan kegiatan belajar, selesaikan tugas, raih targetmu!</p>
+    </header>
+
+    <main>
+
+        <!-- Ringkasan Tugas -->
+        <section class="summary">
+
+            <div class="card">
+                <h2 id="totalTasks">0</h2>
+                <p>Total tugas</p>
+            </div>
+
+            <div class="card">
+                <h2 id="completedTasks">0</h2>
+                <p>Tugas selesai</p>
+            </div>
+
+            <div class="card">
+                <h2 id="progressText">0%</h2>
+                <p>Progress belajar</p>
+
+                <div class="progress-bg">
+                    <div id="progressBar"></div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Form Tambah Tugas -->
+        <section class="panel">
+
+            <h2>Tambah Tugas Baru</h2>
+
+            <form id="taskForm">
+
+                <input
+                    id="taskName"
+                    type="text"
+                    placeholder="Nama tugas / kegiatan"
+                    required
+                >
+
+                <input
+                    id="subject"
+                    type="text"
+                    placeholder="Mata kuliah"
+                    required
+                >
+
+                <input
+                    id="deadline"
+                    type="date"
+                    required
+                >
+
+                <select id="priority">
+                    <option value="Low">Prioritas rendah</option>
+                    <option value="Medium" selected>Prioritas sedang</option>
+                    <option value="High">Prioritas tinggi</option>
+                </select>
+
+                <button type="submit">Tambah</button>
+
+            </form>
+
+        </section>
+
+        <!-- Daftar Tugas -->
+        <section class="panel" style="margin-top:22px">
+
+            <h2>Daftar Tugas</h2>
+
+            <div id="taskList">
+                <p class="empty">
+                    Belum ada tugas. Yuk, tambahkan tugas pertamamu!
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer>
+        Study Planner — dibuat untuk membantu kegiatan belajar lebih teratur.
+    </footer>
+
+    <script>
+
+        const form = document.getElementById("taskForm");
+        const taskList = document.getElementById("taskList");
+
+        let tasks = JSON.parse(
+            localStorage.getItem("studyPlannerTasks")
+        ) || [];
+
+        // Menyimpan data tugas
+        function saveTasks() {
+            localStorage.setItem(
+                "studyPlannerTasks",
+                JSON.stringify(tasks)
+            );
+        }
+
+        // Menampilkan daftar tugas
+        function renderTasks() {
+
+            taskList.innerHTML = "";
+
+            if (tasks.length === 0) {
+                taskList.innerHTML = `
+                    <p class="empty">
+                        Belum ada tugas. Yuk, tambahkan tugas pertamamu!
+                    </p>
+                `;
+            }
+
+            tasks.forEach(function(task) {
+
+                const item = document.createElement("div");
+
+                item.className = "task" +
+                    (task.completed ? " done" : "");
+
+                // Checkbox tugas
+                const checkbox = document.createElement("input");
+
+                checkbox.type = "checkbox";
+                checkbox.checked = task.completed;
+
+                checkbox.addEventListener("change", function() {
+
+                    task.completed = checkbox.checked;
+
+                    saveTasks();
+                    renderTasks();
+
+                });
+
+                // Informasi tugas
+                const info = document.createElement("div");
+
+                info.className = "task-info";
+
+                const title = document.createElement("strong");
+
+                title.textContent = task.name;
+
+                const detail = document.createElement("small");
+
+                detail.textContent =
+                    task.subject + " • Deadline: " + task.deadline;
+
+                info.appendChild(title);
+                info.appendChild(detail);
+
+                // Prioritas tugas
+                const badge = document.createElement("span");
+
+                badge.className =
+                    "priority " + task.priority.toLowerCase();
+
+                badge.textContent = task.priority;
+
+                // Tombol hapus
+                const deleteButton = document.createElement("button");
+
+                deleteButton.className = "delete";
+                deleteButton.textContent = "Hapus";
+
+                deleteButton.addEventListener("click", function() {
+
+                    tasks = tasks.filter(function(currentTask) {
+                        return currentTask.id !== task.id;
+                    });
+
+                    saveTasks();
+                    renderTasks();
+
+                });
+
+                item.appendChild(checkbox);
+                item.appendChild(info);
+                item.appendChild(badge);
+                item.appendChild(deleteButton);
+
+                taskList.appendChild(item);
+
+            });
+
+            updateSummary();
+
+        }
+
+        // Menghitung progress tugas
+        function updateSummary() {
+
+            const total = tasks.length;
+
+            const completed = tasks.filter(function(task) {
+                return task.completed;
+            }).length;
+
+            const percentage = total === 0
+                ? 0
+                : Math.round((completed / total) * 100);
+
+            document.getElementById("totalTasks").textContent = total;
+
+            document.getElementById("completedTasks").textContent =
+                completed;
+
+            document.getElementById("progressText").textContent =
+                percentage + "%";
+
+            document.getElementById("progressBar").style.width =
+                percentage + "%";
+
+        }
+
+        // Menambahkan tugas baru
+        form.addEventListener("submit", function(event) {
+
+            event.preventDefault();
+
+            const newTask = {
+
+                id: Date.now(),
+
+                name: document.getElementById("taskName").value.trim(),
+
+                subject: document.getElementById("subject").value.trim(),
+
+                deadline: document.getElementById("deadline").value,
+
+                priority: document.getElementById("priority").value,
+
+                completed: false
+
+            };
+
+            if (
+                !newTask.name ||
+                !newTask.subject ||
+                !newTask.deadline
+            ) {
+                alert("Mohon lengkapi semua data tugas.");
+                return;
+            }
+
+            tasks.push(newTask);
+
+            saveTasks();
+            renderTasks();
+
+            form.reset();
+
+            document.getElementById("priority").value = "Medium";
+
+        });
+
+        // Menampilkan data saat halaman dibuka
+        renderTasks();
+
+    </script>
+
+</body>
+</html>
